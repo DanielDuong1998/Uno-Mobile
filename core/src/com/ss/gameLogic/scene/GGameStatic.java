@@ -18,8 +18,11 @@ public class GGameStatic {
   public static float[] ratioCardsPlayers = new float[]{1, 0.6f, 0.6f, 0.6f};
 
   //todo:: mode game
-  public static int modeGame = 1;
+  public static int modeGame = 2;
 
   //todo:: position card in the table
   public static Vector2 positionCenter = new Vector2(GMain.screenWidth/2 - 70, GMain.screenHeight/2 - 85);
+
+  //todo:: quantityCard
+  public static int quantityCard = 0;
 }

@@ -27,7 +27,7 @@ repeat: none
   index: -1
 03
   rotate: false
-  xy: 980, 1772
+  xy: 332, 1772
   size: 160, 250
   orig: 160, 250
   offset: 0, 0
@@ -251,7 +251,7 @@ repeat: none
   index: -1
 312
   rotate: false
-  xy: 488, 8
+  xy: 980, 1772
   size: 160, 250
   orig: 160, 250
   offset: 0, 0
@@ -265,7 +265,7 @@ repeat: none
   index: -1
 33
   rotate: false
-  xy: 326, 8
+  xy: 650, 260
   size: 160, 250
   orig: 160, 250
   offset: 0, 0
@@ -377,14 +377,14 @@ repeat: none
   index: -1
 46
   rotate: false
-  xy: 650, 260
+  xy: 488, 8
   size: 160, 250
   orig: 160, 250
   offset: 0, 0
   index: -1
 47
   rotate: false
-  xy: 332, 1772
+  xy: 326, 8
   size: 160, 250
   orig: 160, 250
   offset: 0, 0

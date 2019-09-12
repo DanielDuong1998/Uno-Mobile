@@ -55,17 +55,19 @@ public class HandlingCards {
         else {
           if(j != 13){
             Vector2 tile = new Vector2(i, j);
-            tile.add(tile);
+            tiles.add(tile);
           }
           else {
             Vector2 tile = new Vector2(9, 1);
-            tile.add(tile);
+            tiles.add(tile);
           }
         }
       }
     }
     tiles.shuffle();
     initCardTemp();
+    Gdx.app.log("debug", "size tiles: "+ tiles.size);
+
   }
 
   private void initCardTemp(){
@@ -77,16 +79,16 @@ public class HandlingCards {
     cardsTemp.add(cards1, cards2, cards3, cards4);
   }
 
-  public void renderCards(Array<Card> cards, Array<Vector2> tiles){
-    int count = 0;
-    Gdx.app.log("debug", "x-y: " + tiles.get(0).x + "-" + tiles.get(0).y);
-    for(Vector2 tile : tiles){
-      Card card = new Card(cardsUnoAtlas, group, (int)tile.x, (int)tile.y);
-      card.setPosition(count*cfg.CW*cfg.ratioCP, 0);
-      cards.add(card);
-      count++;
-    }
-  }
+//  public void renderCards(Array<Card> cards, Array<Vector2> tiles){
+//    int count = 0;
+//    Gdx.app.log("debug", "x-y: " + tiles.get(0).x + "-" + tiles.get(0).y);
+//    for(Vector2 tile : tiles){
+//      Card card = new Card(cardsUnoAtlas, group, (int)tile.x, (int)tile.y);
+//      card.setPosition(count*cfg.CW*cfg.ratioCP, 0);
+//      cards.add(card);
+//      count++;
+//    }
+//  }
 
   public void distributeCards(Array<Array<Card>> cards, Array<Vector2> tiles, Array<Vector2> positionCards, Array<Group> groupCards){
     moveCard(turnDistributeCards, cards, tiles, positionCards, groupCards);
@@ -94,6 +96,10 @@ public class HandlingCards {
 
   public void moveCard(int turnDistributeCards, Array<Array<Card>> cards, Array<Vector2> tiles, Array<Vector2> positionCards, Array<Group> groupCards){
     if(turnDistributeCards == 29){
+      GGameStatic.quantityCard = 29;
+      for(Card card : cards.get(0)){
+        card.addDrag();
+      }
       rotation(cards);
       return;
     }
@@ -103,8 +109,8 @@ public class HandlingCards {
 
     Gdx.app.log("debug", "turn: " + turnDistributeCards + " x-y: " + GGameStatic.positionCenter.x + "-" + GGameStatic.positionCenter.y);
 
-    Card tempCard = new Card(cardsUnoAtlas, group, (int)tiles.get(0).x, (int)tiles.get(0).y);
-    Card card = new Card(cardsUnoAtlas, groupCards.get(turnDistributeCards%4), (int)tiles.get(0).x, (int)tiles.get(0).y);
+    Card tempCard = new Card(cardsUnoAtlas, group, board, (int)tiles.get(0).x, (int)tiles.get(0).y);
+    Card card = new Card(cardsUnoAtlas, groupCards.get(turnDistributeCards%4), board, (int)tiles.get(0).x, (int)tiles.get(0).y);
     tiles.removeIndex(0);
     card.setVisible(false);
 
@@ -114,7 +120,7 @@ public class HandlingCards {
     }
     else {
       tempCard.setSize(0.6f);
-      card.setSize(0.6f);
+      card.setVisible(false);
       cardInTheTable = tempCard;
       cardInTheTable.setTouch(Touchable.disabled);
     }
@@ -204,9 +210,9 @@ public class HandlingCards {
     Tweens.setTimeout(group, 0.4f, ()->{
       showGroupCards(cards);
       clearCardsTemp();
-      sortCards(cards, 0);
+      sortCards(cards, 0, true);
       if(GGameStatic.modeGame == 2) {
-        sortCards(cards, 2);
+        sortCards(cards, 2, true);
       }
     });
   }
@@ -232,13 +238,13 @@ public class HandlingCards {
     }
   }
 
-  private void sortCards(Array<Array<Card>> cards, int positionCards){
-    sortCards2(cards, positionCards, 0);
+  public void sortCards(Array<Array<Card>> cards, int positionCards, boolean isBeforePlay){
+    sortCards2(cards, positionCards, 0, isBeforePlay);
   }
 
-  private void sortCards2(Array<Array<Card>> cards, int positionCards, int index){
+  private void sortCards2(Array<Array<Card>> cards, int positionCards, int index, boolean isBeforePlay){
     if(index >= cards.get(positionCards).size - 1){
-      if((GGameStatic.modeGame == 2 && positionCards == 2) ||(GGameStatic.modeGame == 1 && positionCards == 0)){
+      if(((GGameStatic.modeGame == 2 && positionCards == 2) ||(GGameStatic.modeGame == 1 && positionCards == 0)) && isBeforePlay){
         Tweens.setTimeout(group, 1, ()->{
           board.doneRenderStart();
         });
@@ -263,12 +269,12 @@ public class HandlingCards {
           final int indexTemp = index + 1;
           cards.get(positionCards).swap(index+1, j);
           Tweens.setTimeout(group, 0.2f, ()->{
-            sortCards2(cards, positionCards, indexTemp);
+            sortCards2(cards, positionCards, indexTemp, isBeforePlay);
           });
           return;
         }
       }
     }
-    sortCards2(cards, positionCards, ++index);
+    sortCards2(cards, positionCards, ++index, isBeforePlay);
   }
 }

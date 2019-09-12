@@ -21,6 +21,7 @@ import static com.badlogic.gdx.scenes.scene2d.actions.Actions.*;
 public class Card {
   TextureAtlas cardsUnoAtlas;
   Group group;
+  Board board;
   public int element;
   public int value;
   public Image image;
@@ -28,9 +29,10 @@ public class Card {
 
   BoardConfig cfg;
 
-  public Card(TextureAtlas cardsUnoAtlas, Group group, int element, int value){
+  public Card(TextureAtlas cardsUnoAtlas, Group group, Board board, int element, int value){
     this.cardsUnoAtlas = cardsUnoAtlas;
     this.group = group;
+    this.board = board;
     this.element = element;
     this.value = value;
 
@@ -49,7 +51,8 @@ public class Card {
     this.group.addActor(image);
     this.group.addActor(tileDown);
 
-    addDrag();
+    //addDrag();
+    //addClick();
   }
 
   public void setPosition(float x, float y){
@@ -75,6 +78,11 @@ public class Card {
     tileDown.addAction(rotateTo(rotation, duration, interpolation));
   }
 
+  public void setRotation(float rotation){
+    image.setRotation(rotation);
+    tileDown.setRotation(rotation);
+  }
+
   public void setSize(float ratio){
     image.setSize(image.getWidth()*ratio, image.getHeight()*ratio);
     tileDown.setSize(tileDown.getWidth()*ratio, tileDown.getHeight()*ratio);
@@ -82,11 +90,15 @@ public class Card {
 
   private void addClick(){
     image.addListener(new ClickListener(){
-
+      @Override
+      public void clicked(InputEvent event, float x, float y) {
+        super.clicked(event, x, y);
+        image.addAction(moveBy(0, -50, 0.2f, fastSlow));
+      }
     });
   }
 
-  private void addDrag(){
+  public void addDrag(){
     image.addListener(new DragListener(){
       float startX, startY, stopX, stopY;
       int zIndex;
@@ -130,6 +142,7 @@ public class Card {
         }
         else {
           image.setZIndex(zIndex);
+          board.moveCard(Card.this);
         }
       }
     });
@@ -137,5 +150,12 @@ public class Card {
 
   public void setTouch(Touchable touchable){
     image.setTouchable(touchable);
+  }
+
+  public void setAlign(int align){
+    image.setAlign(align);
+    image.setOrigin(align);
+    tileDown.setAlign(align);
+    tileDown.setOrigin(align);
   }
 }
