@@ -2,20 +2,22 @@ package com.ss.gameLogic.objects;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
-import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
+import com.ss.GMain;
 import com.ss.core.action.exAction.GSimpleAction;
 import com.ss.core.commons.Tweens;
+import com.ss.core.util.GUI;
 import com.ss.gameLogic.objects.staticObject.HandlingCards;
 import com.ss.gameLogic.objects.staticObject.Rules;
 import com.ss.gameLogic.scene.GGameMain;
 import com.ss.gameLogic.scene.GGameStatic;
+
 
 import static com.badlogic.gdx.math.Interpolation.*;
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.*;
@@ -35,6 +37,9 @@ public class Board {
   boolean isRightDirection = true;
   int turnGame;
 
+  Image arrowUp;
+  Image arrowBottom;
+
   public Board(TextureAtlas cardsUnoAtlas, Group group, GGameMain game){
     this.cardsUnoAtlas = cardsUnoAtlas;
     this.group = group;
@@ -43,20 +48,12 @@ public class Board {
     init();
     handlingCards = new HandlingCards(this.cardsUnoAtlas, this.group, this);
     turnGame = (int) Math.floor(Math.random()*4);
+    //turnGame = 3;
     shuffleCards();
 
     Tweens.setTimeout(group, 0.5f, ()->{
       renderCards();
     });
-//    group.addListener(new DragListener(){
-//      @Override
-//      public void drag(InputEvent event, float x, float y, int pointer) {
-//        super.drag(event, x, y, pointer);
-//        Gdx.app.log("debug", "x-y" + x + "-" + y + " pointer x-y: " + pointer);
-//        float delta = x - group.getWidth()/2;
-//        group.moveBy(delta-getDragStartX(), 0);
-//      }
-//    });
   }
 
   private void init(){
@@ -83,21 +80,104 @@ public class Board {
         elementInTheTable = (int)Math.floor(Math.random()*4 + 1);
       }
       else elementInTheTable = cardInTheTable.element;
-      Gdx.app.log("debug", "render cards done!!! turn: " + turnGame);
+      Gdx.app.log("debug", "render cards done!!! turn: " + turnGame + " element: " + elementInTheTable);
       startGame();
   }
 
   private void startGame(){
-//    cardsAvailable = rules.getAvailableCards(cards.get(0), cardInTheTable, elementInTheTable);
-//
-//    int dem = 0;
-//    for(Card card : cardsAvailable) {
-//      card.image.addAction(Actions.moveBy(0, -50, 0.5f, Interpolation.fastSlow));
-//      dem++;
-//    }
 
-    addCard(2);
+    getCard();
+  }
 
+  private void showArrow(){
+    if(arrowBottom!= null){
+      arrowBottom.remove();
+    }
+    if(arrowUp!= null){
+      arrowUp.remove();
+    }
+
+    //if(elementInTheTable == 1){
+      arrowUp = GUI.createImage(cardsUnoAtlas, GGameStatic.arrowName[elementInTheTable-1]);
+      arrowBottom = GUI.createImage(cardsUnoAtlas, GGameStatic.arrowName[elementInTheTable-1]);
+      group.addActor(arrowUp);
+      group.addActor(arrowBottom);
+      arrowUp.setSize(arrowUp.getWidth()*0.25f,arrowUp.getHeight()*0.2f);
+      arrowBottom.setSize(arrowBottom.getWidth()*0.25f,arrowBottom.getHeight()*0.2f);
+      arrowUp.setAlign(Align.center);
+      arrowBottom.setAlign(Align.center);
+      arrowUp.setPosition(GMain.screenWidth/2-30, GMain.screenHeight/2 - 100, Align.center);
+      arrowBottom.setPosition(GMain.screenWidth/2-30 + arrowBottom.getWidth(), GMain.screenHeight/2 + 200, Align.center);
+      arrowBottom.setScale(-1);
+
+      //if()
+
+    //}
+    //}
+  }
+
+  private void getCard(){
+
+    showArrow();
+
+    if(checkEndGame() != -1){
+      Gdx.app.log("debug_board: 89", "winner: " + checkEndGame());
+      return;
+    }
+
+    if(turnGame%4 != 0){
+      cardsAvailable = rules.getAvailableCards(cards.get(turnGame%4), cardInTheTable, elementInTheTable);
+      if(cardsAvailable.size == 0){
+        Gdx.app.log("debug", "turn: " + turnGame%4 + " rut bai");
+        takeCards();
+      }
+      else {
+        Gdx.app.log("debug", "turn: " + turnGame%4 + " danh bai");
+        int idCardMove = (int)Math.floor(Math.random()*cardsAvailable.size);
+        moveCard(cardsAvailable.get(idCardMove));
+      }
+    }
+    else {
+      cardsAvailable = rules.getAvailableCards(cards.get(0), cardInTheTable, elementInTheTable);
+      if(cardsAvailable.size == 0){
+        Gdx.app.log("debug", "turn: " + turnGame%4 + " rut bai");
+        //todo:: goi ham lay bai
+        addCard(0, true);
+      }
+      else {
+        Gdx.app.log("debug", "turn: " + turnGame%4 + " danh bai");
+        for(Card card : cards.get(0)){
+          card.setTouch(Touchable.disabled);
+        }
+
+        for(Card card : cardsAvailable){
+          card.setTouch(Touchable.enabled);
+        }
+        upAvailableCards(0);
+      }
+    }
+  }
+
+  private void upAvailableCards(int turnGame){
+    if(turnGame == 0){
+      for(Card card : cardsAvailable){
+        card.image.addAction(moveBy(0, -50, 0.15f, fastSlow));
+        card.tileDown.addAction(moveBy(0, -50, 0.15f, fastSlow));
+      }
+    }
+  }
+
+  private void downAvailableCards(int turnGame){
+    if(turnGame == 0){
+      for(Card card : cardsAvailable){
+        card.image.addAction(moveBy(0, 50, 0.15f, fastSlow));
+        card.tileDown.addAction(moveBy(0, 50, 0.15f, fastSlow));
+      }
+    }
+  }
+
+  private void takeCards(){
+    addCard(turnGame%4, true);
   }
 
   private Vector3 positionAddCard(int turnGame){
@@ -139,18 +219,22 @@ public class Board {
     return position;
   }
 
-  private void addCard(int turnGame){
+  private void addCard(int turnGame, boolean flag){
     Card cardTemp = new Card(cardsUnoAtlas, group, this, (int)tiles.get(0).x, (int)tiles.get(0).y);
     Card card = new Card(cardsUnoAtlas, game.groupCards.get(turnGame%4), this, (int) tiles.get(0).x, (int)tiles.get(0).y);
     if(turnGame%4 != 0){
       card.setTouch(Touchable.disabled);
     }
+    else {
+      card.setTouch(Touchable.enabled);
+      card.addDrag();
+    }
     tiles.removeIndex(0);
-    Vector3 positon = positionAddCard(turnGame);
+    Vector3 positon = positionAddCard(turnGame%4);
     cards.get(turnGame%4).add(card);
     card.setVisible(false);
 
-    card.setSize(GGameStatic.ratioCardsPlayers[turnGame]);
+    card.setSize(GGameStatic.ratioCardsPlayers[turnGame%4]);
     card.setAlign(Align.center);
     card.setPosition(positon.x, positon.y);
     card.setRotation(positon.z);
@@ -173,14 +257,14 @@ public class Board {
     cardTemp.tileDown.addAction(sequence(
         moveTo(game.groupCards.get(turnGame%4).getX() + card.image.getX(), game.groupCards.get(turnGame%4).getY() + card.image.getY(), 0.15f, fastSlow),
         GSimpleAction.simpleAction((d, a)->{
-          completeAddCard(cardTemp, card, turnGame);
+          completeAddCard(cardTemp, card, flag);
           return true;
         })
     ));
 
   }
 
-  private void completeAddCard(Card cardTemp, Card card, int turnGame){
+  private void completeAddCard(Card cardTemp, Card card, boolean flag){
     cardTemp.setVisible(false);
     if(turnGame%4 == 0 || (turnGame%4 == 2 && GGameStatic.modeGame == 2)){
       card.setVisibleImage(true);
@@ -190,34 +274,55 @@ public class Board {
     }
 
     if(turnGame%4 == 0 || (turnGame%4 == 2 && GGameStatic.modeGame == 2)){
-      handlingCards.sortCards(cards, turnGame, false);
+      handlingCards.sortCards(cards, turnGame%4, false);
     }
+
+    if(flag){
+      Tweens.setTimeout(group, 0.5f, ()->{
+        handLingCardInTheTable();
+      });
+    }
+
   }
 
+
+
   public void moveCard(Card card){
-    Gdx.app.log("debug", "turn: " + turnGame);
-    cards.get(turnGame).removeValue(card, true);
+    Gdx.app.log("debug", "turn: " + turnGame%4);
+    cards.get(turnGame%4).removeValue(card, true);
 
     Card cardTemp = new Card(cardsUnoAtlas, group, this, card.element, card.value);
     cardTemp.setTouch(Touchable.disabled);
     cardTemp.setVisibleTiledown(false);
-    cardTemp.setPosition(game.groupCards.get(0).getX() + card.image.getX(),game.groupCards.get(0).getY() + card.image.getY());
+    cardTemp.setPosition(game.groupCards.get(turnGame%4).getX() + card.image.getX(),game.groupCards.get(turnGame%4).getY() + card.image.getY());
     card.setVisible(false);
 
     cardTemp.setSize(0.6f);
     cardTemp.setAlign(Align.center);
     cardTemp.rotationCard((float) Math.floor(Math.random()*90 - 90), 0.15f, linear);
 
+    cardInTheTable = cardTemp;
+    if(cardTemp.element == 9){
+      elementInTheTable = (int) Math.floor(Math.random()*4 + 1);
+    }
+    else elementInTheTable = cardInTheTable.element;
+
     cardTemp.image.addAction(sequence(
         moveTo(GGameStatic.positionCenter.x, GGameStatic.positionCenter.y, 0.15f, fastSlow),
         GSimpleAction.simpleAction((d, a)->{
-          rightPositionCards(turnGame);
+          rightPositionCards(turnGame%4);
           return true;
         })
     ));
   }
 
   private void rightPositionCards(int indexCards){
+    if(indexCards == 0){
+      for(Card card : cards.get(0)){
+        card.setTouch(Touchable.disabled);
+      }
+    }
+
     if(indexCards == 0 || indexCards == 2) {
       for(int i = 0; i < cards.get(indexCards).size; i++) {
         float pX = cfg.CW*0.4f*GGameStatic.ratioCardsPlayers[indexCards]*i;
@@ -233,7 +338,126 @@ public class Board {
         cards.get(indexCards).get(i).tileDown.addAction(moveTo(0, pY, 0.15f, fastSlow));
       }
     }
+
+    Tweens.setTimeout(group, 0.5f, ()->{
+      handLingCardInTheTable();
+    });
+
   }
 
+  private int checkEndGame(){
+    int result = -1;
+    int minCards = 0;
+    if(tiles.size == 0){
+      for(int i = 1; i < 4; i++) {
+        if(cards.get(i).size < cards.get(minCards).size){
+          minCards = i;
+        }
+      }
+      result = minCards;
+    }
+    else{
+      for(int i = 0; i < 4; i++) {
+        if(cards.get(i).size == 0){
+          result = i;
+        }
+      }
+    }
+    return result;
+  }
 
+  private void handLingCardInTheTable(){
+    if(cardInTheTable.value == 10){ //todo: nguoi choi moi + 2
+      if(isRightDirection)
+        turnGame++;
+      else {
+        turnGame--;
+        if(turnGame == -1)
+          turnGame = 3;
+      }
+
+      addCard(turnGame%4, false);
+      Tweens.setTimeout(group, 1, ()->{
+        addCard(turnGame%4, false);
+        Tweens.setTimeout(group, 1, ()->{
+          //todo:
+          cardsAvailable.clear();
+          getCard();
+        });
+      });
+      return;
+    }
+    else if(cardInTheTable.value == 11){ // todo: nguoi choi moi boc 1 va bo luot
+      if(isRightDirection)
+        turnGame++;
+      else {
+        turnGame--;
+        if(turnGame == -1)
+          turnGame = 3;
+      }
+      addCard(turnGame%4, false);
+
+      Tweens.setTimeout(group, 1, ()->{
+        if(isRightDirection)
+          turnGame++;
+        else {
+          turnGame--;
+          if(turnGame == -1)
+            turnGame = 3;
+        }
+        //todo:
+        cardsAvailable.clear();
+        getCard();
+      });
+      return;
+    }
+    else if(cardInTheTable.value == 12){ // todo: doi chieu
+      isRightDirection = !isRightDirection;
+    }
+    else if(cardInTheTable.element == 9 && cardInTheTable.value == 0){ //todo: nguoi choi moi + 4 va chon mau
+      elementInTheTable = (int)Math.floor(Math.random()*4 + 1);
+
+      if(isRightDirection)
+        turnGame++;
+      else {
+        turnGame--;
+        if(turnGame == -1)
+          turnGame = 3;
+      }
+
+      addCard(turnGame%4, false);
+      Tweens.setTimeout(group, 1, ()->{
+        addCard(turnGame%4, false);
+        Tweens.setTimeout(group, 1, ()->{
+          addCard(turnGame%4, false);
+          Tweens.setTimeout(group, 1, ()->{
+            addCard(turnGame%4, false);
+            Tweens.setTimeout(group, 1, ()->{
+              //todo:
+              cardsAvailable.clear();
+              getCard();
+            });
+          });
+        });
+      });
+      return;
+
+    }
+    else if(cardInTheTable.element == 9 && cardInTheTable.value == 1){//todo: nguoi choi moi chon mau
+      elementInTheTable = (int)Math.floor(Math.random()*4 + 1);
+    }
+    if(isRightDirection)
+      turnGame++;
+    else {
+      turnGame--;
+      if(turnGame == -1)
+        turnGame = 3;
+    }
+    //todo:
+    cardsAvailable.clear();
+    getCard();
+
+
+
+  }
 }

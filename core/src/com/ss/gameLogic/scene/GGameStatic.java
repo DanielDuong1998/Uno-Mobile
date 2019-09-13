@@ -25,4 +25,7 @@ public class GGameStatic {
 
   //todo:: quantityCard
   public static int quantityCard = 0;
+
+  //todo:: nameArrow
+  public static String[] arrowName = new String[]{"blueArrow", "greenArrow", "yellowArrow", "redArrow"};
 }

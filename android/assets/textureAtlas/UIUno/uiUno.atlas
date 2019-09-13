@@ -1,13 +1,41 @@
 
 uiUno.png
-size: 2048,1024
+size: 2048,2048
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
 bg1
   rotate: false
-  xy: 2, 2
+  xy: 2, 1274
   size: 1280, 720
   orig: 1280, 720
+  offset: 0, 0
+  index: -1
+blueArrow
+  rotate: false
+  xy: 2, 660
+  size: 1047, 612
+  orig: 1047, 612
+  offset: 0, 0
+  index: -1
+greenArrow
+  rotate: false
+  xy: 2, 2
+  size: 911, 656
+  orig: 911, 656
+  offset: 0, 0
+  index: -1
+redArrow
+  rotate: false
+  xy: 1051, 660
+  size: 880, 612
+  orig: 880, 612
+  offset: 0, 0
+  index: -1
+yellowArrow
+  rotate: false
+  xy: 915, 146
+  size: 1015, 512
+  orig: 1015, 512
   offset: 0, 0
   index: -1

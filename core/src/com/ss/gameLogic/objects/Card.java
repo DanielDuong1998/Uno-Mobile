@@ -36,7 +36,6 @@ public class Card {
     this.element = element;
     this.value = value;
 
-    Gdx.app.log("debug", "element: " + element + " value: " + value);
     image = GUI.createImage(cardsUnoAtlas, this.element + "" + this.value);
     tileDown = GUI.createImage(cardsUnoAtlas, GGameStatic.tileDownStr);
 
@@ -50,6 +49,8 @@ public class Card {
 
     this.group.addActor(image);
     this.group.addActor(tileDown);
+
+    //setVisibleTiledown(false);
 
     //addDrag();
     //addClick();
@@ -123,13 +124,11 @@ public class Card {
       @Override
       public void dragStop(InputEvent event, float x, float y, int pointer) {
         super.dragStop(event, x, y, pointer);
-        Gdx.app.log("debug", "zindex: " + zIndex);
         stopX = image.getX();
         stopY = image.getY();
         float deltaX = stopX - startX;
         float deltaY = stopY - startY;
 
-        Gdx.app.log("debug", "delta x-y: " + deltaX + "-" + deltaY);
 
         if(Math.abs(deltaY) < 100){
           image.addAction(sequence(

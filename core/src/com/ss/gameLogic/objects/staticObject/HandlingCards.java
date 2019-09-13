@@ -1,6 +1,5 @@
 package com.ss.gameLogic.objects.staticObject;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Group;
@@ -66,7 +65,6 @@ public class HandlingCards {
     }
     tiles.shuffle();
     initCardTemp();
-    Gdx.app.log("debug", "size tiles: "+ tiles.size);
 
   }
 
@@ -107,7 +105,6 @@ public class HandlingCards {
     float pX = turnDistributeCards != 28 ? positionCards.get(turnDistributeCards%4).x : GGameStatic.positionCenter.x;
     float pY = turnDistributeCards != 28 ? positionCards.get(turnDistributeCards%4).y : GGameStatic.positionCenter.y;
 
-    Gdx.app.log("debug", "turn: " + turnDistributeCards + " x-y: " + GGameStatic.positionCenter.x + "-" + GGameStatic.positionCenter.y);
 
     Card tempCard = new Card(cardsUnoAtlas, group, board, (int)tiles.get(0).x, (int)tiles.get(0).y);
     Card card = new Card(cardsUnoAtlas, groupCards.get(turnDistributeCards%4), board, (int)tiles.get(0).x, (int)tiles.get(0).y);
@@ -149,7 +146,6 @@ public class HandlingCards {
         rotateTo(rotation, 0.2f, linear)
       ),
       GSimpleAction.simpleAction((d, a)->{
-        Gdx.app.log("debug", "done_90_Handling");
         addTurnDistributeCards(cards, tiles, positionCards, groupCards);
         return true;
       })

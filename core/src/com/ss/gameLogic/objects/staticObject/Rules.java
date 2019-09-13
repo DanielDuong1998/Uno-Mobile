@@ -22,7 +22,13 @@ public class Rules {
     if(cardCheck.element == 9){
       return true;
     }
-    else {
+    else if(cardInTheTable.element == 9){
+      if(cardCheck.element == elementInTheTable)
+        return true;
+      else return false;
+    }
+    else
+    {
       if(cardCheck.element == elementInTheTable || cardCheck.value == cardInTheTable.value)
         return true;
       else return false;
