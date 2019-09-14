@@ -57,9 +57,9 @@ public class GGameMain extends GScreen {
     public void initPositionCards(){
         positionCards = new Array<>();
         Vector2 p1 = new Vector2(GMain.screenWidth/2 - 300, GMain.screenHeight-200);
-        Vector2 p2 = new Vector2(GMain.screenWidth*0.15f, GMain.screenHeight/2 - 200);
+        Vector2 p2 = new Vector2(GMain.screenWidth*0.15f, GMain.screenHeight/2 - 250);
         Vector2 p3 = new Vector2(GMain.screenWidth/2 - 100, 0);
-        Vector2 p4 = new Vector2(GMain.screenWidth*0.7f, GMain.screenHeight/2 - 70);
+        Vector2 p4 = new Vector2(GMain.screenWidth*0.7f, GMain.screenHeight/2 - 20);
         positionCards.add(p1, p2, p3, p4);
     }
 

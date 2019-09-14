@@ -28,4 +28,7 @@ public class GGameStatic {
 
   //todo:: nameArrow
   public static String[] arrowName = new String[]{"blueArrow", "greenArrow", "yellowArrow", "redArrow"};
+
+  //todo:: isclick card
+  public static boolean isClickCard = false;
 }

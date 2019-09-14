@@ -18,11 +18,11 @@ public class Rules {
     return cardsAvailableCards;
   }
 
-  private boolean check2Card(Card cardCheck, Card cardInTheTable, int elementInTheTable){
+  public boolean check2Card(Card cardCheck, Card cardInTheTable, int elementInTheTable){
     if(cardCheck.element == 9){
       return true;
     }
-    else if(cardInTheTable.element == 9){
+    else if(cardInTheTable.element == 9 || cardInTheTable.element == 100){
       if(cardCheck.element == elementInTheTable)
         return true;
       else return false;

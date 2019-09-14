@@ -95,16 +95,12 @@ public class HandlingCards {
   public void moveCard(int turnDistributeCards, Array<Array<Card>> cards, Array<Vector2> tiles, Array<Vector2> positionCards, Array<Group> groupCards){
     if(turnDistributeCards == 29){
       GGameStatic.quantityCard = 29;
-      for(Card card : cards.get(0)){
-        card.addDrag();
-      }
       rotation(cards);
       return;
     }
 
     float pX = turnDistributeCards != 28 ? positionCards.get(turnDistributeCards%4).x : GGameStatic.positionCenter.x;
-    float pY = turnDistributeCards != 28 ? positionCards.get(turnDistributeCards%4).y : GGameStatic.positionCenter.y;
-
+    float pY = turnDistributeCards != 28 ? positionCards.get(turnDistributeCards%4).y: GGameStatic.positionCenter.y;
 
     Card tempCard = new Card(cardsUnoAtlas, group, board, (int)tiles.get(0).x, (int)tiles.get(0).y);
     Card card = new Card(cardsUnoAtlas, groupCards.get(turnDistributeCards%4), board, (int)tiles.get(0).x, (int)tiles.get(0).y);

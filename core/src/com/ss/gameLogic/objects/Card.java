@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
 import com.badlogic.gdx.utils.Align;
 import com.ss.core.action.exAction.GSimpleAction;
+import com.ss.core.commons.Tweens;
 import com.ss.core.util.GUI;
 import com.ss.gameLogic.scene.GGameStatic;
 
@@ -103,9 +104,19 @@ public class Card {
     image.addListener(new DragListener(){
       float startX, startY, stopX, stopY;
       int zIndex;
+      boolean flag;
+
       @Override
       public void dragStart(InputEvent event, float x, float y, int pointer) {
         super.dragStart(event, x, y, pointer);
+        if(!GGameStatic.isClickCard){
+          flag = true;
+          GGameStatic.isClickCard = true;
+        }
+        else {
+          flag = false;
+          return;
+        }
         zIndex = image.getZIndex();
         image.setZIndex(100);
         Gdx.app.log("debug", "position start: " + image.getX() + " zindex: " + zIndex );
@@ -116,6 +127,10 @@ public class Card {
       @Override
       public void drag(InputEvent event, float x, float y, int pointer) {
         super.drag(event, x, y, pointer);
+        Gdx.app.log("debug_126", "flag: " + flag);
+        if(!flag){
+          return;
+        }
         float deltaX = x - image.getWidth()/2;
         float deltaY = y - image.getHeight()/2;
         image.moveBy(deltaX, deltaY);
@@ -124,17 +139,19 @@ public class Card {
       @Override
       public void dragStop(InputEvent event, float x, float y, int pointer) {
         super.dragStop(event, x, y, pointer);
+        if(!flag){
+          return;
+        }
         stopX = image.getX();
         stopY = image.getY();
         float deltaX = stopX - startX;
         float deltaY = stopY - startY;
-
-
         if(Math.abs(deltaY) < 100){
           image.addAction(sequence(
             moveBy(-deltaX, -deltaY, 0.15f, fastSlow),
             GSimpleAction.simpleAction((d, a)->{
               image.setZIndex(zIndex);
+              GGameStatic.isClickCard = false;
               return true;
             })
           ));
@@ -142,6 +159,9 @@ public class Card {
         else {
           image.setZIndex(zIndex);
           board.moveCard(Card.this);
+          Tweens.setTimeout(group, 0.2f, ()->{
+            GGameStatic.isClickCard = false;
+          });
         }
       }
     });

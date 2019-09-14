@@ -34,8 +34,9 @@ public class Board {
   HandlingCards handlingCards;
   Card cardInTheTable;
   int elementInTheTable;
-  boolean isRightDirection = true;
+  boolean isRightDirection = false;
   int turnGame;
+  int numberAddCard = 0;
 
   Image arrowUp;
   Image arrowBottom;
@@ -81,6 +82,13 @@ public class Board {
       }
       else elementInTheTable = cardInTheTable.element;
       Gdx.app.log("debug", "render cards done!!! turn: " + turnGame + " element: " + elementInTheTable);
+      for(Card card : cards.get(0)){
+        card.addDrag();
+      }
+      for(Card card : cards.get(0)){
+        card.setTouch(Touchable.disabled);
+      }
+
       startGame();
   }
 
@@ -110,7 +118,12 @@ public class Board {
       arrowBottom.setPosition(GMain.screenWidth/2-30 + arrowBottom.getWidth(), GMain.screenHeight/2 + 200, Align.center);
       arrowBottom.setScale(-1);
 
-      //if()
+      if(!isRightDirection){
+        arrowUp.setScaleX(-1);
+        arrowBottom.setScaleX(1);
+        arrowUp.setX(arrowUp.getX() + arrowUp.getWidth());
+        arrowBottom.setX(arrowBottom.getX() - arrowBottom.getWidth());
+      }
 
     //}
     //}
@@ -128,11 +141,9 @@ public class Board {
     if(turnGame%4 != 0){
       cardsAvailable = rules.getAvailableCards(cards.get(turnGame%4), cardInTheTable, elementInTheTable);
       if(cardsAvailable.size == 0){
-        Gdx.app.log("debug", "turn: " + turnGame%4 + " rut bai");
         takeCards();
       }
       else {
-        Gdx.app.log("debug", "turn: " + turnGame%4 + " danh bai");
         int idCardMove = (int)Math.floor(Math.random()*cardsAvailable.size);
         moveCard(cardsAvailable.get(idCardMove));
       }
@@ -140,12 +151,10 @@ public class Board {
     else {
       cardsAvailable = rules.getAvailableCards(cards.get(0), cardInTheTable, elementInTheTable);
       if(cardsAvailable.size == 0){
-        Gdx.app.log("debug", "turn: " + turnGame%4 + " rut bai");
         //todo:: goi ham lay bai
-        addCard(0, true);
+        addCard(0, 0);
       }
       else {
-        Gdx.app.log("debug", "turn: " + turnGame%4 + " danh bai");
         for(Card card : cards.get(0)){
           card.setTouch(Touchable.disabled);
         }
@@ -177,7 +186,7 @@ public class Board {
   }
 
   private void takeCards(){
-    addCard(turnGame%4, true);
+    addCard(turnGame%4, 0);
   }
 
   private Vector3 positionAddCard(int turnGame){
@@ -219,7 +228,7 @@ public class Board {
     return position;
   }
 
-  private void addCard(int turnGame, boolean flag){
+  private void addCard(int turnGame, int numberCard){ //todo: numberCard = 0, bot bai khong do la bai chuc nang, numberCard > 0, số bai can bot
     Card cardTemp = new Card(cardsUnoAtlas, group, this, (int)tiles.get(0).x, (int)tiles.get(0).y);
     Card card = new Card(cardsUnoAtlas, game.groupCards.get(turnGame%4), this, (int) tiles.get(0).x, (int)tiles.get(0).y);
     if(turnGame%4 != 0){
@@ -257,14 +266,14 @@ public class Board {
     cardTemp.tileDown.addAction(sequence(
         moveTo(game.groupCards.get(turnGame%4).getX() + card.image.getX(), game.groupCards.get(turnGame%4).getY() + card.image.getY(), 0.15f, fastSlow),
         GSimpleAction.simpleAction((d, a)->{
-          completeAddCard(cardTemp, card, flag);
+          completeAddCard(cardTemp, card, numberCard);
           return true;
         })
     ));
 
   }
 
-  private void completeAddCard(Card cardTemp, Card card, boolean flag){
+  private void completeAddCard(Card cardTemp, Card card, int numberCard){
     cardTemp.setVisible(false);
     if(turnGame%4 == 0 || (turnGame%4 == 2 && GGameStatic.modeGame == 2)){
       card.setVisibleImage(true);
@@ -276,11 +285,36 @@ public class Board {
     if(turnGame%4 == 0 || (turnGame%4 == 2 && GGameStatic.modeGame == 2)){
       handlingCards.sortCards(cards, turnGame%4, false);
     }
+    Gdx.app.log("debug_board_293", "numberAddCArd: " + numberAddCard);
 
-    if(flag){
+    if(numberCard == 0){
       Tweens.setTimeout(group, 0.5f, ()->{
-        handLingCardInTheTable();
+        if(rules.check2Card(card, cardInTheTable, elementInTheTable)){
+          moveCard(card);
+        }
+        else {
+          handLingCardInTheTable();
+        }
       });
+    }
+    else {
+      numberAddCard++;
+      if(numberAddCard >= numberCard){
+        numberAddCard = 0;
+        cardsAvailable.clear();
+        cardInTheTable.element = 100;
+        int duaration1 = (int) Math.floor(Math.random()*20 + 1);
+        float duaration2 = turnGame%4 == 0 ? 0 : (float) duaration1/10;
+        Tweens.setTimeout(group, duaration2, ()->{
+          getCard();
+        });
+        return;
+      }
+      else {
+        Tweens.setTimeout(group, 0.3f, ()->{
+          addCard(turnGame, numberCard);
+        });
+      }
     }
 
   }
@@ -376,18 +410,13 @@ public class Board {
           turnGame = 3;
       }
 
-      addCard(turnGame%4, false);
-      Tweens.setTimeout(group, 1, ()->{
-        addCard(turnGame%4, false);
-        Tweens.setTimeout(group, 1, ()->{
-          //todo:
-          cardsAvailable.clear();
-          getCard();
-        });
-      });
+
+
+      addCard(turnGame%4, 2);
+      Gdx.app.log("debug", "+2");
       return;
     }
-    else if(cardInTheTable.value == 11){ // todo: nguoi choi moi boc 1 va bo luot
+    else if(cardInTheTable.value == 11){ // todo: nguoi choi moi bo luot
       if(isRightDirection)
         turnGame++;
       else {
@@ -395,24 +424,11 @@ public class Board {
         if(turnGame == -1)
           turnGame = 3;
       }
-      addCard(turnGame%4, false);
-
-      Tweens.setTimeout(group, 1, ()->{
-        if(isRightDirection)
-          turnGame++;
-        else {
-          turnGame--;
-          if(turnGame == -1)
-            turnGame = 3;
-        }
-        //todo:
-        cardsAvailable.clear();
-        getCard();
-      });
-      return;
     }
     else if(cardInTheTable.value == 12){ // todo: doi chieu
       isRightDirection = !isRightDirection;
+      cardInTheTable.element = 100;
+      cardInTheTable.value = 100;
     }
     else if(cardInTheTable.element == 9 && cardInTheTable.value == 0){ //todo: nguoi choi moi + 4 va chon mau
       elementInTheTable = (int)Math.floor(Math.random()*4 + 1);
@@ -425,21 +441,8 @@ public class Board {
           turnGame = 3;
       }
 
-      addCard(turnGame%4, false);
-      Tweens.setTimeout(group, 1, ()->{
-        addCard(turnGame%4, false);
-        Tweens.setTimeout(group, 1, ()->{
-          addCard(turnGame%4, false);
-          Tweens.setTimeout(group, 1, ()->{
-            addCard(turnGame%4, false);
-            Tweens.setTimeout(group, 1, ()->{
-              //todo:
-              cardsAvailable.clear();
-              getCard();
-            });
-          });
-        });
-      });
+      addCard(turnGame%4, 4);
+      Gdx.app.log("debug", "+4");
       return;
 
     }
@@ -455,9 +458,12 @@ public class Board {
     }
     //todo:
     cardsAvailable.clear();
-    getCard();
-
-
-
+    int duaration1 = (int) Math.floor(Math.random()*20 + 1);
+    float duaration2 = turnGame%4 == 0 ? 0 : (float) duaration1/10;
+    Tweens.setTimeout(group, duaration2, ()->{
+      getCard();
+    });
   }
+
+
 }
